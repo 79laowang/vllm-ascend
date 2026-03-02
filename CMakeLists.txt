@@ -22,9 +22,9 @@ find_package(Torch REQUIRED)
 
 run_python(TORCH_VERSION
   "import torch; print(torch.__version__)" "Failed to locate torch path")
-# check torch version is 2.9.0
-if(NOT ${TORCH_VERSION} VERSION_EQUAL "2.9.0")
-  message(FATAL_ERROR "Expected PyTorch version 2.9.0, but found ${TORCH_VERSION}")
+# check torch version is 2.8.x, 2.9.0, or 2.9.1
+if(NOT (${TORCH_VERSION} VERSION_EQUAL "2.9.1" OR ${TORCH_VERSION} VERSION_EQUAL "2.9.0" OR ${TORCH_VERSION} VERSION_EQUAL "2.8.0"))
+  message(FATAL_ERROR "Expected PyTorch version 2.8.0, 2.9.0, or 2.9.1, but found ${TORCH_VERSION}")
 endif()
 
 set(RUN_MODE "npu" CACHE STRING "cpu/sim/npu")
@@ -76,6 +76,12 @@ if(SOC_VERSION MATCHES "ascend310p.*")
     list(REMOVE_ITEM VLLM_ASCEND_CUSTOM_OP ${VLLM_ASCEND_CUSTOM_OP_EXCLUDE})
 endif()
 
+if(SOC_VERSION MATCHES "ascend310b.*")
+    message(STATUS "310B hardware detected: disabling MLAPO operators")
+    message(STATUS "310B hardware detected: excluding batch_matmul_transpose operators")
+    list(REMOVE_ITEM VLLM_ASCEND_CUSTOM_OP ${VLLM_ASCEND_CUSTOM_OP_EXCLUDE})
+endif()
+
 ascendc_library(vllm_ascend_kernels SHARED
     ${VLLM_ASCEND_CUSTOM_OP}
 )
@@ -83,6 +89,10 @@ ascendc_library(vllm_ascend_kernels SHARED
 message("TORCH_NPU_PATH is ${TORCH_NPU_PATH}")
 
 if(SOC_VERSION MATCHES "ascend310p.*")
+    file(GLOB VLLM_ASCEND_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/csrc/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/csrc/aclnn_torch_adapter/*.cpp)
+elseif(SOC_VERSION MATCHES "ascend310b.*")
     file(GLOB VLLM_ASCEND_SRC
     ${CMAKE_CURRENT_SOURCE_DIR}/csrc/*.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/csrc/aclnn_torch_adapter/*.cpp)

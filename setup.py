@@ -153,6 +153,10 @@ def gen_build_info():
         "ascend310p3vir02": "_310P",
         "ascend310p3vir04": "_310P",
         "ascend310p3vir08": "_310P",
+        "ascend310b1": "_310B",
+        "ascend310b2": "_310B",
+        "ascend310b3": "_310B",
+        "ascend310b4": "_310B",
         "ascend910_9579": "A5",
     }
 
