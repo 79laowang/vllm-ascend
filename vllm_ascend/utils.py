@@ -688,8 +688,9 @@ def check_ascend_device_type():
         cur_device_type = AscendDeviceType._310P
     elif soc_version == 260:
         cur_device_type = AscendDeviceType.A5
-    elif soc_version == 15 or 33 <= soc_version <= 35:
+    elif 15 <= soc_version <= 35 or 240 <= soc_version <= 250:
         # Ascend310B1=15, Ascend310B2=33, Ascend310B3=34, Ascend310B4=35
+        # Note: Some 310B devices may report different soc versions like 243
         cur_device_type = AscendDeviceType._310B
     else:
         raise RuntimeError(f"Can not support soc_version: {soc_version}.")

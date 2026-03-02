@@ -157,6 +157,7 @@ def gen_build_info():
         "ascend310b2": "_310B",
         "ascend310b3": "_310B",
         "ascend310b4": "_310B",
+        "ascend310b": "_310B",
         "ascend910_9579": "A5",
     }
 
