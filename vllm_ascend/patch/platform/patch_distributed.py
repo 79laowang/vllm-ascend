@@ -85,5 +85,5 @@ def communication_adaptation_310p():
     )
 
 
-if get_ascend_device_type() == AscendDeviceType._310P:
+if get_ascend_device_type() in [AscendDeviceType._310P, AscendDeviceType._310B]:
     communication_adaptation_310p()

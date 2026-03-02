@@ -47,6 +47,7 @@ from vllm_ascend.utils import (
     update_aclgraph_sizes,
     update_cudagraph_capture_sizes,
     is_310p,
+    is_310b,
     enable_sp,
 )
 
@@ -146,7 +147,7 @@ class NPUPlatform(Platform):
                 if ASCEND_QUANTIZATION_METHOD not in quant_action.choices:
                     quant_action.choices.append(ASCEND_QUANTIZATION_METHOD)
 
-        if not is_310p():
+        if not is_310p() and not is_310b():
             from vllm_ascend.quantization import AscendCompressedTensorsConfig, AscendModelSlimConfig  # noqa: F401
         else:
             from vllm_ascend._310p.quantization import AscendModelSlimConfig310  # noqa: F401
@@ -347,7 +348,7 @@ class NPUPlatform(Platform):
         if parallel_config and parallel_config.worker_cls == "auto":
             # TODO: this is a tricky way to disable `use_sequence_parallel_moe` in vllm.
             parallel_config.all2all_backend = "flashinfer_all2allv"
-            if is_310p():
+            if is_310p() or is_310b():
                 parallel_config.worker_cls = "vllm_ascend._310p.worker_310p.NPUWorker310"
             elif ascend_config.xlite_graph_config.enabled:
                 logger.info("openEuler Xlite enabled. See: https://atomgit.com/openeuler/GVirt/tree/master/xlite")
@@ -357,8 +358,8 @@ class NPUPlatform(Platform):
 
         refresh_block_size(vllm_config)
 
-        # Activate custom ops for v1, except on 310P
-        if get_ascend_device_type() != AscendDeviceType._310P:
+        # Activate custom ops for v1, except on 310P and 310B
+        if get_ascend_device_type() not in [AscendDeviceType._310P, AscendDeviceType._310B]:
             compilation_config.custom_ops = ["all"]
 
         if ascend_config.recompute_scheduler_enable:
@@ -492,7 +493,7 @@ class NPUPlatform(Platform):
             # (True, True):  "...AscendSFABackend310",
         }
 
-        if is_310p():
+        if is_310p() or is_310b():
             return backend_map_310.get(key, backend_map_310[(False, False)])
 
         return backend_map[key]

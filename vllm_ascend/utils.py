@@ -78,6 +78,10 @@ def is_310p():
     return get_ascend_device_type() == AscendDeviceType._310P
 
 
+def is_310b():
+    return get_ascend_device_type() == AscendDeviceType._310B
+
+
 def _print_callback_on_stream(*args):
     """Callback function to print arguments on the dedicated print stream."""
     global _GRAPH_PRINT_STREAM
@@ -657,6 +661,7 @@ class AscendDeviceType(Enum):
     A3 = 1
     _310P = 2
     A5 = 3
+    _310B = 4
 
 
 _ascend_device_type = None
@@ -683,6 +688,9 @@ def check_ascend_device_type():
         cur_device_type = AscendDeviceType._310P
     elif soc_version == 260:
         cur_device_type = AscendDeviceType.A5
+    elif soc_version == 15 or 33 <= soc_version <= 35:
+        # Ascend310B1=15, Ascend310B2=33, Ascend310B3=34, Ascend310B4=35
+        cur_device_type = AscendDeviceType._310B
     else:
         raise RuntimeError(f"Can not support soc_version: {soc_version}.")
 
